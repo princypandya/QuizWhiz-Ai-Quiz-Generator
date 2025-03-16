@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './Components/Header/Header';
 import Footer from './Components/Footer/Footer';
-import Home from './Components/Home/Home';
+import Home from './Components/Pages/Home';
 
 const App =()=>{
   const [progress, setProgress] = useState(0)
@@ -14,7 +14,10 @@ const App =()=>{
         <Header />
         <div style={{ flex: 1 }}>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="" element={<Home />} />
+            {/* <Route path="" element={<1V1 />} />
+            <Route path="" element={<Results />} />
+            <Route path="" element={<Custom />} /> */}
           </Routes>
         </div>
         <Footer />
