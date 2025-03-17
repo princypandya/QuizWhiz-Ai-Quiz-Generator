@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './Components/Header/Header';
 import Footer from './Components/Footer/Footer';
 import Home from './Components/Pages/Home';
+import Quiz from './Components/Pages/Quiz';
 
 const App =()=>{
   const [progress, setProgress] = useState(0)
@@ -15,6 +16,7 @@ const App =()=>{
         <div style={{ flex: 1 }}>
           <Routes>
             <Route path="" element={<Home />} />
+            <Route path="/Quiz" element={<Quiz/>} />
             {/* <Route path="" element={<1V1 />} />
             <Route path="" element={<Results />} />
             <Route path="" element={<Custom />} /> */}
