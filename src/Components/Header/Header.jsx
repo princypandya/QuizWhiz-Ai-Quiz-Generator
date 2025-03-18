@@ -81,15 +81,16 @@ function Header() {
 
               {/* Login/Signup Pill */}
               <div className="d-flex rounded-pill bg-white border border-1 border-dark/10 overflow-hidden">
-                <Link
-                  to="/login"
+                <Nav.Link
+                  as={Link}
+                  to="/Login"
                   className="text-dark px-4 py-2 text-decoration-none hover-effect"
                 >
                   Login
-                </Link>
+                </Nav.Link>
                 <div className="border-start border-dark/10"></div> {/* Divider */}
                 <Link
-                  to="/signup"
+                  to="/Signup"
                   className="text-dark px-4 py-2 text-decoration-none hover-effect"
                 >
                   Signup
