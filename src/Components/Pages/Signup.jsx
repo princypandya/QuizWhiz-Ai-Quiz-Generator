@@ -1,6 +1,20 @@
 import React from 'react';
+import { useState } from 'react';
+import './Signup.css'
+import axios from 'axios'
+import { Result } from 'postcss';
+
 
 function Signup() {
+    const[name,setName]=useState("")
+    const[email,setEmail]=useState("")
+    const[password,setPassword]=useState("")
+    const handleSubmit=(e)=>{
+        e.preventDefault()
+        axios.post('http://localhost:5175/Signup',{name, email, password})
+        .then(result=>console.log(result))
+        .catch(err=>console.log(err))
+    }
     return (
         <>
             <div className="d-flex justify-content-center align-items-center vh-100 mt-5 mb-5">
@@ -14,18 +28,7 @@ function Signup() {
                         <span className="fs-4 fw-bold">Create an account!</span>
                     </div>
                     <div>
-                        <form className='fs-0'>
-                            {/* Username */}
-                            <div className="mb-3">
-                                <label htmlFor="username" className="form-label">Username</label>
-                                <input 
-                                    type="text" 
-                                    className="form-control" 
-                                    id="username" 
-                                    placeholder="Enter your username" 
-                                    required 
-                                />
-                            </div>
+                        <form className='fs-0' action='/SignUp' method='post' onSubmit={handleSubmit}>
                             {/* Name */}
                             <div className="mb-3">
                                 <label htmlFor="name" className="form-label">Name</label>
@@ -35,16 +38,7 @@ function Signup() {
                                     id="name" 
                                     placeholder="Enter your full name" 
                                     required 
-                                />
-                            </div>
-                            {/* Birth Date */}
-                            <div className="mb-3">
-                                <label htmlFor="birthdate" className="form-label">Birth Date</label>
-                                <input 
-                                    type="date" 
-                                    className="form-control" 
-                                    id="birthdate" 
-                                    required 
+                                    onChange={(e)=> setName(e.target.value)}
                                 />
                             </div>
                             {/* Email */}
@@ -56,6 +50,7 @@ function Signup() {
                                     id="email" 
                                     placeholder="Enter your email address" 
                                     required 
+                                    onChange={(e)=> setEmail(e.target.value)}
                                 />
                             </div>
                             {/* Password */}
@@ -67,6 +62,7 @@ function Signup() {
                                     id="password" 
                                     placeholder="Enter your password" 
                                     required 
+                                    onChange={(e)=> setPassword(e.target.value)}
                                 />
                             </div>
                             {/* Confirm Password */}

@@ -19,15 +19,15 @@ function Login() {
                     
                     {/* Form */}
                     <div>
-                        <form>
-                            {/* Username */}
+                        <form action='/Login' method='post'>
+                            {/* email */}
                             <div className="mb-3">
                                 <label htmlFor="username" className="form-label">Username</label>
                                 <input 
                                     type="text" 
                                     className="form-control" 
-                                    id="username" 
-                                    placeholder="Enter your username" 
+                                    id="email" 
+                                    placeholder="Enter your email" 
                                     required 
                                 />
                             </div>
