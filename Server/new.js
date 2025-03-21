@@ -22,7 +22,7 @@ mongoose.connect("mongodb://localhost:27017/UserDetails")
 // });
 
 app.post('/Signup',(req,res)=>{
-    SignUpModel.create(req,body)
+    SignUpModel.create(req,req.body)
     .then(UserDetails=>res.join(UserDetails))
     .catch(err=>res.json(err))
 })
