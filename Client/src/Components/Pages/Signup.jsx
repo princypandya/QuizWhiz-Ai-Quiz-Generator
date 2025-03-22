@@ -10,13 +10,14 @@ function Signup() {
     const[email,setEmail]=useState("")
     const[password,setPassword]=useState("")
     const navigate=useNavigate()
-    const handleSubmit=(e)=>{
-        e.preventDefault()
-        axios.post('http://localhost:5175/Signup',{name, email, password})
-        .then(result=>{
-            console.log(result),navigate('')
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        axios.post('http://localhost:5175/Signup', { name, email, password })
+        .then(result => {
+            console.log("Signup successful:", result.data);
+            navigate('/'); 
         })
-        .catch(err=>console.log(err))
+        .catch(err => console.log("Signup error:", err));
     }
     return (
         <>
