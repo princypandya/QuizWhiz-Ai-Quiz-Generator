@@ -15,6 +15,8 @@ function Signup() {
         axios.post('http://localhost:5175/Signup', { name, email, password })
         .then(result => {
             console.log("Signup successful:", result.data);
+            localStorage.setItem('token', email);
+            console.log("Token stored in local storage"+localStorage.getItem('token'));
             navigate('/'); 
         })
         .catch(err => console.log("Signup error:", err));
@@ -24,11 +26,6 @@ function Signup() {
             <div className="d-flex justify-content-center align-items-center vh-100 mt-5 mb-5">
                 <div className="shadow p-4 bg-light rounded w-50">
                     <div className="d-flex align-items-center justify-content-center mb-4">
-                        <img 
-                            src="/Images/SignIn.png" 
-                            alt="Sign In" 
-                            className="img-fluid me-3 w-10"
-                        />
                         <span className="fs-4 fw-bold">Create an account!</span>
                     </div>
                     <div>
