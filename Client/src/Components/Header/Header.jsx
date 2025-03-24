@@ -78,6 +78,13 @@ function Header() {
               >
                 <FaCogs className="me-2" /> Custom
               </Nav.Link>
+              <Nav.Link
+                as={Link}
+                to="/Quiz"
+                className="text-dark d-flex align-items-center mx-3 hover-effect"
+              >
+                <FaCogs className="me-2" /> Quiz
+              </Nav.Link>
 
               {/* Login/Signup Pill */}
               <div className="d-flex rounded-pill bg-white border border-1 border-dark/10 overflow-hidden">

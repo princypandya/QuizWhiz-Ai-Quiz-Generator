@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 
 function Quiz() {
+
+
+
   const [config, setConfig] = useState({
     topic: "",
     difficulty: "easy",
     numQuestions: 5,
     timerType: "individual",
-    timerDuration: 10, // Default timer duration in seconds for individual mode
+    timerDuration: 10,
   });
   const [showConfigModal, setShowConfigModal] = useState(true);
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState([]);
-  const [timer, setTimer] = useState(config.timerDuration); // Individual timer in seconds
-  const [totalTime, setTotalTime] = useState(config.timerDuration * config.numQuestions); // Global timer in seconds
+  const [timer, setTimer] = useState(config.timerDuration);
+  const [totalTime, setTotalTime] = useState(config.timerDuration * config.numQuestions);
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizFinished, setQuizFinished] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
+  const [startTime, setStartTime] = useState(null);
+  const [actualTimeTaken, setActualTimeTaken] = useState(0);
 
   const handleConfigSubmit = () => {
     const mockQuestions = Array.from({ length: config.numQuestions }, (_, i) => ({
@@ -28,12 +34,13 @@ function Quiz() {
     setQuestions(mockQuestions);
     setShowConfigModal(false);
     setQuizStarted(true);
-    setTimer(config.timerDuration); // Set individual timer in seconds
+    setTimer(config.timerDuration);
     setTotalTime(
       config.timerType === "individual"
-        ? config.timerDuration * config.numQuestions // Individual mode: total time in seconds
-        : config.timerDuration * 60 // Collective mode: total time in seconds (minutes converted to seconds)
+        ? config.timerDuration * config.numQuestions
+        : config.timerDuration * 60
     );
+    setStartTime(new Date());
   };
 
   const handleAnswerSelect = (answer) => {
@@ -43,22 +50,22 @@ function Quiz() {
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
         if (config.timerType === "individual") {
-          setTimer(config.timerDuration); // Reset individual timer in seconds
+          setTimer(config.timerDuration);
         }
-        setSelectedOption(null); // Reset selected option for the next question
+        setSelectedOption(null);
       } else {
         finishQuiz();
       }
-    }, 1500); // Delay to show the glow effect before moving to the next question
+    }, 1500);
   };
 
   useEffect(() => {
     if (quizStarted && !quizFinished) {
       const interval = setInterval(() => {
         if (config.timerType === "individual") {
-          setTimer((prev) => prev - 1); // Decrease individual timer in seconds
+          setTimer((prev) => prev - 1);
         } else {
-          setTotalTime((prev) => prev - 1); // Decrease global timer in seconds
+          setTotalTime((prev) => prev - 1);
         }
       }, 1000);
       return () => clearInterval(interval);
@@ -78,15 +85,46 @@ function Quiz() {
   const handleTimeUp = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setTimer(config.timerDuration); // Reset individual timer in seconds
+      setTimer(config.timerDuration);
     } else {
       finishQuiz();
     }
   };
 
   const finishQuiz = () => {
+    const endTime = new Date();
+    const timeTaken = (endTime - startTime) / 1000;
+    setActualTimeTaken(timeTaken);
     setQuizFinished(true);
     setQuizStarted(false);
+  
+    // Get email from localStorage - ensure this matches how you store it during signup
+    const userEmail = localStorage.getItem('token'); // or localStorage.getItem('email')
+    
+    if (!userEmail) {
+      console.error("No user email found in localStorage");
+      return;
+    }
+  
+    // Prepare the results data
+    const results = {
+      date: new Date().toISOString(),
+      topic: config.topic,
+      difficulty: config.difficulty,
+      timeTaken: timeTaken,
+      score: calculateScore(),
+      totalQuestions: questions.length,
+      email: userEmail // Make sure this matches your backend schema
+    };
+  
+    // Send results to backend
+    axios.post('http://localhost:5175/SaveQuizResults', results)
+      .then(response => {
+        console.log("Results saved successfully:", response.data);
+      })
+      .catch(error => {
+        console.error("Error saving results:", error.response?.data || error.message);
+      });
   };
 
   const calculateScore = () => {
@@ -95,10 +133,9 @@ function Quiz() {
     ).length;
   };
 
-  // Helper function to format time in minutes and seconds
   const formatTime = (timeInSeconds) => {
     const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
+    const seconds = Math.floor(timeInSeconds % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
@@ -200,6 +237,9 @@ function Quiz() {
           <h2 style={styles.resultTitle}>Quiz Finished!</h2>
           <p style={styles.resultText}>
             Your Score: {calculateScore()} / {questions.length}
+          </p>
+          <p style={styles.resultText}>
+            Time Taken: {formatTime(actualTimeTaken)}
           </p>
         </div>
       )}

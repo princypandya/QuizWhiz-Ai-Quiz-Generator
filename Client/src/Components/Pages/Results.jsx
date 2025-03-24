@@ -1,22 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ResultBox from '../../assets/ResultBox';
+import { useNavigate } from 'react-router-dom';
+
 
 function Results() {
   const token = localStorage.getItem('token');
   console.log(token);
+  const navigate = useNavigate();
   if (token === null) {
-    window.location.href = '/Login';
+    navigate('/Login');
     return null;
   }
+
+
+  const [results, setResults] = useState([]);
+  
+  useEffect(() => {
+    fetch(`http://localhost:5175/GetUserResults/${token}`)
+      .then(response => response.json())
+      .then(data => setResults(data))
+      .catch(err => console.error("Failed to fetch results:", err));
+  }, []);
+
   return (
-    <ResultBox 
-      score={85} 
-      total={100} 
-      timeTaken="5m 20s" 
-      date="2025-03-23"  
-      topic="JavaScript Basics" 
-      difficulty="Medium" 
-    />
+    results.map(result => (
+      <ResultBox 
+        score={result.score} 
+        total={result.totalQuestions} 
+        timeTaken={result.timeTaken} 
+        date={result.date}  
+        topic={result.topic} 
+        difficulty={result.difficulty} 
+      />
+    ))
   );
 }
 

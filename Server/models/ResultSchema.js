@@ -1,27 +1,14 @@
-const mongoose=require('mongoose')
+// models/Results.js
+const mongoose = require('mongoose');
 
-const Resultschema = new mongoose.Schema({
-    date: {
-        type: Date,
-        default: Date.now
-    },
-    topic: {
-        type: String,
-        required: true
-    },
-    difficulty: {
-        type: String,
-        required: true
-    },
-    timetaken: {
-        type: String,
-        required: true
-    },
-    score: {
-        type: Number,
-        required: true
-    },
-})
+const resultsSchema = new mongoose.Schema({
+  date: { type: Date, required: true },
+  topic: { type: String, required: true },
+  difficulty: { type: String, required: true },
+  timeTaken: { type: Number, required: true }, // in seconds
+  score: { type: Number, required: true },
+  totalQuestions: { type: Number, required: true },
+  email: { type: String, required: true },
+}, { timestamps: true });
 
-const Resultsmodel = new mongoose.model("UserDetails", Resultschema)
-module.exports=Resultsmodel
+module.exports = mongoose.model('Results', resultsSchema);
