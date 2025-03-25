@@ -1,8 +1,37 @@
-import React from 'react';
+import {React,useState,useEffect} from 'react';
 import { FaBrain, FaClock, FaChartLine } from 'react-icons/fa'; // Icons for benefits
 import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 function Home() {
+  const [selectedTopic, setSelectedTopic] = useState(null);
+  const navigate = useNavigate();
+
+  const [config, setConfig] = useState({
+    topic: "",
+    difficulty: "",
+    numQuestions: 10,
+  });
+
+  useEffect(() => {
+    const storedTopic = localStorage.getItem("selectedTopic");
+    const storedDifficulty = localStorage.getItem("selectedDifficulty");
+    const storedNumQuestions = localStorage.getItem("numQuestions");
+  
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      topic: storedTopic || prevConfig.topic,
+      difficulty: storedDifficulty || prevConfig.difficulty,
+      numQuestions: storedNumQuestions ? parseInt(storedNumQuestions) : prevConfig.numQuestions,
+    }));
+  }, []);
+  
+  const handleTopicClick = (topic) => {
+    setSelectedTopic(topic);
+    localStorage.setItem("selectedTopic", topic); // Overwrite previous topic
+    navigate("/Quiz"); // Navigate to Quiz page
+  };
+
   return (
     <div className="bg-blue-50">
       {/* Page 1: Existing Content */}
@@ -57,6 +86,7 @@ function Home() {
             ].map((topic) => (
               <button
                 key={topic}
+                onClick={() => handleTopicClick(topic)}
                 className="px-5 py-2.5 bg-white/10 text-black font-medium rounded-full border border-blue-300 shadow-sm hover:bg-blue-100 hover:text-blue-700 hover:border-blue-400 transition-all duration-300 text-sm backdrop-blur-md"
               >
                 {topic}

@@ -10,7 +10,7 @@ function Login() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        axios.post('http://localhost:5175/Login', { email, password })
+        axios.post('http://localhost:5173/Login', { email, password })
             .then(result => {
                 console.log("Login successful:", result.data);
                 localStorage.setItem('token', email);

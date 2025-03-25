@@ -3,7 +3,12 @@ import axios from 'axios';
 
 function Quiz() {
 
-
+  useEffect(() => {
+    const savedTopic = localStorage.getItem("selectedTopic");
+    if (savedTopic) {
+      setConfig((prevConfig) => ({ ...prevConfig, topic: savedTopic }));
+    }
+  }, []);
 
   const [config, setConfig] = useState({
     topic: "",
@@ -12,6 +17,7 @@ function Quiz() {
     timerType: "individual",
     timerDuration: 10,
   });
+
   const [showConfigModal, setShowConfigModal] = useState(true);
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -24,24 +30,48 @@ function Quiz() {
   const [startTime, setStartTime] = useState(null);
   const [actualTimeTaken, setActualTimeTaken] = useState(0);
 
+  const handleTopicChange = (e) => {
+    const newTopic = e.target.value;
+    setConfig((prevConfig) => ({ ...prevConfig, topic: newTopic }));
+    localStorage.setItem("selectedTopic", newTopic);
+  };
+
+  const handleDifficultyChange = (e) => {
+    const newDifficulty = e.target.value;
+    setConfig((prevConfig) => ({ ...prevConfig, difficulty: newDifficulty }));
+    localStorage.setItem("selectedDifficulty", newDifficulty);
+  };
+
+  const handleNumQuestionsChange = (e) => {
+    const newNumQuestions = parseInt(e.target.value);
+    setConfig((prevConfig) => ({ ...prevConfig, numQuestions: newNumQuestions }));
+    localStorage.setItem("numQuestions", newNumQuestions);
+  };
+
   const handleConfigSubmit = () => {
-    const mockQuestions = Array.from({ length: config.numQuestions }, (_, i) => ({
-      id: i + 1,
-      text: `Question ${i + 1}: What is the answer?`,
-      options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-      correctAnswer: "Option 1",
-    }));
-    setQuestions(mockQuestions);
+    const storedQuestions = localStorage.getItem("quizQuestions");
+    let parsedQuestions = [];
+
+    if (storedQuestions) {
+      parsedQuestions = JSON.parse(storedQuestions);
+    } else {
+      // Fallback to mock questions if AI-generated questions are unavailable
+      parsedQuestions = Array.from({ length: config.numQuestions }, (_, i) => ({
+        id: i + 1,
+        text: `Question ${i + 1}: What is the answer?`,
+        options: ["Option 1", "Option 2", "Option 3", "Option 4"],
+        correctAnswer: "Option 1",
+      }));
+    }
+
+    setQuestions(parsedQuestions);
     setShowConfigModal(false);
     setQuizStarted(true);
     setTimer(config.timerDuration);
-    setTotalTime(
-      config.timerType === "individual"
-        ? config.timerDuration * config.numQuestions
-        : config.timerDuration * 60
-    );
+    setTotalTime(config.timerType === "individual" ? config.timerDuration * config.numQuestions : config.timerDuration * 60);
     setStartTime(new Date());
   };
+
 
   const handleAnswerSelect = (answer) => {
     setSelectedOption(answer);
@@ -97,15 +127,15 @@ function Quiz() {
     setActualTimeTaken(timeTaken);
     setQuizFinished(true);
     setQuizStarted(false);
-  
+
     // Get email from localStorage - ensure this matches how you store it during signup
     const userEmail = localStorage.getItem('token'); // or localStorage.getItem('email')
-    
+
     if (!userEmail) {
       console.error("No user email found in localStorage");
       return;
     }
-  
+
     // Prepare the results data
     const results = {
       date: new Date().toISOString(),
@@ -116,7 +146,7 @@ function Quiz() {
       totalQuestions: questions.length,
       email: userEmail // Make sure this matches your backend schema
     };
-  
+
     // Send results to backend
     axios.post('http://localhost:5175/SaveQuizResults', results)
       .then(response => {
@@ -158,7 +188,7 @@ function Quiz() {
               Difficulty:
               <select
                 value={config.difficulty}
-                onChange={(e) => setConfig({ ...config, difficulty: e.target.value })}
+                onChange={handleDifficultyChange}
                 style={styles.input}
               >
                 <option value="easy">Easy</option>
@@ -166,17 +196,17 @@ function Quiz() {
                 <option value="hard">Hard</option>
               </select>
             </label>
+
             <label style={styles.label}>
               Number of Questions:
               <input
                 type="number"
                 value={config.numQuestions}
-                onChange={(e) =>
-                  setConfig({ ...config, numQuestions: parseInt(e.target.value) })
-                }
+                onChange={handleNumQuestionsChange}
                 style={styles.input}
               />
             </label>
+
             <label style={styles.label}>
               Timer Type:
               <select
@@ -231,6 +261,7 @@ function Quiz() {
           )}
         </div>
       )}
+
 
       {quizFinished && (
         <div style={styles.quizFullPage}>

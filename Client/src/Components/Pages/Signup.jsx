@@ -12,7 +12,7 @@ function Signup() {
     const navigate=useNavigate()
     const handleSubmit = (e) => {
         e.preventDefault();
-        axios.post('http://localhost:5175/Signup', { name, email, password })
+        axios.post('http://localhost:5173/Signup', { name, email, password })
         .then(result => {
             console.log("Signup successful:", result.data);
             localStorage.setItem('token', email);
