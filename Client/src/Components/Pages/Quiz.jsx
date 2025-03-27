@@ -21,6 +21,7 @@ function Quiz() {
   const [showConfigModal, setShowConfigModal] = useState(true);
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [error, setError] = useState(null);
   const [userAnswers, setUserAnswers] = useState([]);
   const [timer, setTimer] = useState(config.timerDuration);
   const [totalTime, setTotalTime] = useState(config.timerDuration * config.numQuestions);
@@ -29,6 +30,7 @@ function Quiz() {
   const [selectedOption, setSelectedOption] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [actualTimeTaken, setActualTimeTaken] = useState(0);
+  // const [aiQuestions, ] = useState(0);
 
   const handleTopicChange = (e) => {
     const newTopic = e.target.value;
@@ -48,22 +50,35 @@ function Quiz() {
     localStorage.setItem("numQuestions", newNumQuestions);
   };
 
-  const handleConfigSubmit = () => {
-    const storedQuestions = localStorage.getItem("quizQuestions");
+  // const handleConfigSubmit = async () => {
+  //   await handleCompletion(); // Fetch AI-generated questions first
+  // };
+  
+  
+  const handleConfigSubmit = async () => {
+    await handleCompletion(); // Fetch AI-generated questions first
+  
     let parsedQuestions = [];
-
-    if (storedQuestions) {
-      parsedQuestions = JSON.parse(storedQuestions);
-    } else {
-      // Fallback to mock questions if AI-generated questions are unavailable
-      parsedQuestions = Array.from({ length: config.numQuestions }, (_, i) => ({
-        id: i + 1,
-        text: `Question ${i + 1}: What is the answer?`,
-        options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-        correctAnswer: "Option 1",
-      }));
+    const storedQuestions = localStorage.getItem("quizQuestions");
+  
+    try {
+      if (storedQuestions) {
+        parsedQuestions = JSON.parse(storedQuestions);
+        console.log("Generated from AI");
+      } else {
+        console.log("NOT Generated, using mock questions");
+        parsedQuestions = Array.from({ length: config.numQuestions }, (_, i) => ({
+          id: i + 1,
+          text: `Question ${i + 1}: What is the answer?`,
+          options: ["Option 1", "Option 2", "Option 3", "Option 4"],
+          correctAnswer: "Option 1",
+        }));
+      }
+    } catch (error) {
+      console.error("Error parsing stored questions:", error);
+      parsedQuestions = [];
     }
-
+  
     setQuestions(parsedQuestions);
     setShowConfigModal(false);
     setQuizStarted(true);
@@ -71,7 +86,79 @@ function Quiz() {
     setTotalTime(config.timerType === "individual" ? config.timerDuration * config.numQuestions : config.timerDuration * 60);
     setStartTime(new Date());
   };
-
+  const handleCompletion = async () => {
+    setError(null);
+  
+    try {
+      const apiKey = "AIzaSyAjGFif217NTM9i3-QFAVyl5FNdMo4Rx0k"; 
+      if (!apiKey) throw new Error("API Key is missing");
+  
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `Generate ${config.numQuestions} multiple-choice questions (MCQs) with difficulty level "${config.difficulty}" on the topic "${config.topic}". Return JSON only in the format:
+                  [
+                    {
+                      "id": 1,
+                      "text": "Question text?",
+                      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+                      "correctAnswer": "Option X"
+                    },
+                    ...
+                  ]`,
+                },
+              ],
+            },
+          ],
+        }),
+      });
+  
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  
+      const data = await response.json();
+  
+      let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  
+      // ✅ Remove any unexpected formatting like ```json or ``` from AI response
+      rawText = rawText.replace(/```json|```/g, "").trim();
+  
+      let aiQuestions = [];
+      try {
+        aiQuestions = JSON.parse(rawText);
+      } catch (error) {
+        console.error("Error parsing AI response:", error);
+        throw new Error("Invalid AI-generated question format");
+      }
+  
+      if (!Array.isArray(aiQuestions) || aiQuestions.length === 0) {
+        throw new Error("Empty or invalid AI-generated questions");
+      }
+  
+      // Store questions in state and localStorage
+      setQuestions(aiQuestions);
+      localStorage.setItem("quizQuestions", JSON.stringify(aiQuestions));
+  
+      setShowConfigModal(false);
+      setQuizStarted(true);
+      setTimer(config.timerDuration);
+      setTotalTime(config.timerType === "individual" ? config.timerDuration * config.numQuestions : config.timerDuration * 60);
+      setStartTime(new Date());
+  
+    } catch (err) {
+      console.error("Error in handleCompletion:", err.message);
+      setError(err.message);
+    }
+  };
+  
 
   const handleAnswerSelect = (answer) => {
     setSelectedOption(answer);

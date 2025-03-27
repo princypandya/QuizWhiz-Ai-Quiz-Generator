@@ -1,4 +1,4 @@
-import {React,useState,useEffect} from 'react';
+import { React, useState, useEffect } from 'react';
 import { FaBrain, FaClock, FaChartLine } from 'react-icons/fa'; // Icons for benefits
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
@@ -17,7 +17,7 @@ function Home() {
     const storedTopic = localStorage.getItem("selectedTopic");
     const storedDifficulty = localStorage.getItem("selectedDifficulty");
     const storedNumQuestions = localStorage.getItem("numQuestions");
-  
+
     setConfig((prevConfig) => ({
       ...prevConfig,
       topic: storedTopic || prevConfig.topic,
@@ -25,11 +25,19 @@ function Home() {
       numQuestions: storedNumQuestions ? parseInt(storedNumQuestions) : prevConfig.numQuestions,
     }));
   }, []);
-  
+
   const handleTopicClick = (topic) => {
     setSelectedTopic(topic);
     localStorage.setItem("selectedTopic", topic); // Overwrite previous topic
     navigate("/Quiz"); // Navigate to Quiz page
+  };
+
+  const handleGenerateClick = () => {
+    if (!config.selectedTopic.trim()) {
+      alert("Please enter a quiz topic before generating.");
+      return;
+    }
+    handleTopicClick(config.selectedTopic);
   };
 
   return (
@@ -61,14 +69,19 @@ function Home() {
         <div className="flex items-center justify-center mt-6 flex-col">
           {/* Search Bar */}
           <div className="flex w-full max-w-5xl group transition-all duration-300 hover:scale-105 focus-within:scale-105 rounded-full ring-2 ring-blue-400 ring-opacity-20 focus-within:ring-0 focus-within:shadow-[0_0_10px_2px_rgba(79,109,255,0.3),0_0_20px_5px_rgba(79,109,255,0.2),0_0_30px_10px_rgba(79,109,255,0.1)]">
-          <input
-          type="text"
-          placeholder="Enter your quiz topic..."
-          className="flex-grow px-6 py-3 rounded-l-full border border-blue-200 bg-white/20 text-black placeholder-black/90 backdrop-blur-md focus:outline-none transition-colors duration-300 group-hover:bg-white/30 focus:bg-white/30 focus:shadow-[0_0_10px_2px_rgba(79,109,255,0.3),0_0_20px_5px_rba(79,109,255,0.2),0_0_30px_10px_rgba(79,109,255,0.1)]"
-          />
-          <button className="px-8 py-3 bg-blue-400 text-black font-semibold rounded-r-full shadow-md border border-blue-400 transition-colors duration-300 group-hover:bg-blue-500 focus:bg-blue-500">
-          Generate
-          </button>
+            <input
+              type="text"
+              value={config.selectedTopic}
+              onChange={(e) => setConfig({ ...config, selectedTopic: e.target.value })}
+              placeholder="Enter your quiz topic..."
+              className="flex-grow px-6 py-3 rounded-l-full border border-blue-200 bg-white/20 text-black placeholder-black/90 backdrop-blur-md focus:outline-none transition-colors duration-300 group-hover:bg-white/30 focus:bg-white/30 focus:shadow-[0_0_10px_2px_rgba(79,109,255,0.3),0_0_20px_5px_rgba(79,109,255,0.2),0_0_30px_10px_rgba(79,109,255,0.1)]"
+            />
+            <button
+              className="px-8 py-3 bg-blue-400 text-black font-semibold rounded-r-full shadow-md border border-blue-400 transition-colors duration-300 group-hover:bg-blue-500 focus:bg-blue-500"
+              onClick={handleGenerateClick} // Use the validation function
+            >
+              Generate
+            </button>
           </div>
           <br />
 
@@ -177,10 +190,10 @@ function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Testimonial 1 */}
           <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center space-y-4">
-            <img 
-              src="./public/images/person.jpeg" 
-              alt="Sarah's photo" 
-              className="w-16 h-16 rounded-full object-cover border-2 border-white/70 shadow-sm" 
+            <img
+              src="./public/images/person.jpeg"
+              alt="Sarah's photo"
+              className="w-16 h-16 rounded-full object-cover border-2 border-white/70 shadow-sm"
             />
             <p className="text-lg text-black/80 italic">
               "QuizWhiz has completely changed the way I learn. The quizzes are fun, challenging, and always keep me engaged!"
@@ -190,10 +203,10 @@ function Home() {
 
           {/* Testimonial 2 */}
           <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center space-y-4">
-            <img 
-              src="./public/images/person.jpeg" 
-              alt="John's photo" 
-              className="w-16 h-16 rounded-full object-cover border-2 border-white/70 shadow-sm" 
+            <img
+              src="./public/images/person.jpeg"
+              alt="John's photo"
+              className="w-16 h-16 rounded-full object-cover border-2 border-white/70 shadow-sm"
             />
             <p className="text-lg text-black/80 italic">
               "I love how easy it is to explore new topics. QuizWhiz makes learning feel like a game!"
