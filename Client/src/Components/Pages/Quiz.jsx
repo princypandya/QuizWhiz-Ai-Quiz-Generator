@@ -2,14 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 
 function Quiz() {
-
-  useEffect(() => {
-    const savedTopic = localStorage.getItem("selectedTopic");
-    if (savedTopic) {
-      setConfig((prevConfig) => ({ ...prevConfig, topic: savedTopic }));
-    }handleAnswerSelect
-  }, []);
-
   const [config, setConfig] = useState({
     topic: "",
     difficulty: "easy",
@@ -30,8 +22,24 @@ function Quiz() {
   const [selectedOption, setSelectedOption] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [actualTimeTaken, setActualTimeTaken] = useState(0);
-  // const [aiQuestions, ] = useState(0);
 
+  // Load saved configuration on component mount
+  useEffect(() => {
+    const savedTopic = localStorage.getItem("selectedTopic");
+    const savedDifficulty = localStorage.getItem("selectedDifficulty");
+    const savedNumQuestions = localStorage.getItem("numQuestions");
+
+    if (savedTopic || savedDifficulty || savedNumQuestions) {
+      setConfig(prevConfig => ({
+        ...prevConfig,
+        ...(savedTopic && { topic: savedTopic }),
+        ...(savedDifficulty && { difficulty: savedDifficulty }),
+        ...(savedNumQuestions && { numQuestions: parseInt(savedNumQuestions) })
+      }));
+    }
+  }, []);
+
+  // Configuration change handlers
   const handleTopicChange = (e) => {
     const newTopic = e.target.value;
     setConfig((prevConfig) => ({ ...prevConfig, topic: newTopic }));
@@ -47,54 +55,19 @@ function Quiz() {
   const handleNumQuestionsChange = (e) => {
     const newNumQuestions = parseInt(e.target.value);
     setConfig((prevConfig) => ({ ...prevConfig, numQuestions: newNumQuestions }));
-    localStorage.setItem("numQuestions", newNumQuestions);
+    localStorage.setItem("numQuestions", newNumQuestions.toString());
   };
 
-  // const handleConfigSubmit = async () => {
-  //   await handleCompletion(); // Fetch AI-generated questions first
-  // };
-  
-  
-  const handleConfigSubmit = async () => {
-    await handleCompletion(); // Fetch AI-generated questions first
-  
-    let parsedQuestions = [];
-    const storedQuestions = localStorage.getItem("quizQuestions");
-  
-    try {
-      if (storedQuestions) {
-        parsedQuestions = JSON.parse(storedQuestions);
-        console.log("Generated from AI");
-      } else {
-        console.log("NOT Generated, using mock questions");
-        parsedQuestions = Array.from({ length: config.numQuestions }, (_, i) => ({
-          id: i + 1,
-          text: `Question ${i + 1}: What is the answer?`,
-          options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-          correctAnswer: "Option 1",
-        }));
-      }
-    } catch (error) {
-      console.error("Error parsing stored questions:", error);
-      parsedQuestions = [];
-    }
-  
-    setQuestions(parsedQuestions);
-    setShowConfigModal(false);
-    setQuizStarted(true);
-    setTimer(config.timerDuration);
-    setTotalTime(config.timerType === "individual" ? config.timerDuration * config.numQuestions : config.timerDuration * 60);
-    setStartTime(new Date());
-  };
+  // AI Question Generation
   const handleCompletion = async () => {
     setError(null);
-  
+
     try {
       const apiKey = "AIzaSyAjGFif217NTM9i3-QFAVyl5FNdMo4Rx0k"; 
       if (!apiKey) throw new Error("API Key is missing");
-  
+
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-  
+
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -121,16 +94,16 @@ function Quiz() {
           ],
         }),
       });
-  
+
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  
+
       const data = await response.json();
-  
+
       let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-  
-      // ✅ Remove any unexpected formatting like ```json or ``` from AI response
+
+      // Remove any unexpected formatting
       rawText = rawText.replace(/```json|```/g, "").trim();
-  
+
       let aiQuestions = [];
       try {
         aiQuestions = JSON.parse(rawText);
@@ -138,32 +111,71 @@ function Quiz() {
         console.error("Error parsing AI response:", error);
         throw new Error("Invalid AI-generated question format");
       }
-  
+
       if (!Array.isArray(aiQuestions) || aiQuestions.length === 0) {
         throw new Error("Empty or invalid AI-generated questions");
       }
-  
+
       // Store questions in state and localStorage
       setQuestions(aiQuestions);
       localStorage.setItem("quizQuestions", JSON.stringify(aiQuestions));
-  
-      setShowConfigModal(false);
-      setQuizStarted(true);
-      setTimer(config.timerDuration);
-      setTotalTime(config.timerType === "individual" ? config.timerDuration * config.numQuestions : config.timerDuration * 60);
-      setStartTime(new Date());
-  
+
+      return aiQuestions;
+
     } catch (err) {
       console.error("Error in handleCompletion:", err.message);
       setError(err.message);
+      return null;
     }
   };
-  
 
+  // Configuration Submit Handler
+  const handleConfigSubmit = async () => {
+    let parsedQuestions = [];
+    const storedQuestions = localStorage.getItem("quizQuestions");
+
+    try {
+      // First try to get AI-generated questions
+      const aiQuestions = await handleCompletion();
+      
+      if (aiQuestions && aiQuestions.length > 0) {
+        parsedQuestions = aiQuestions;
+        console.log("Generated from AI");
+      } else if (storedQuestions) {
+        // Fallback to stored questions
+        parsedQuestions = JSON.parse(storedQuestions);
+        console.log("Using stored questions");
+      } else {
+        // Fallback to mock questions
+        console.log("Using mock questions");
+        parsedQuestions = Array.from({ length: config.numQuestions }, (_, i) => ({
+          id: i + 1,
+          text: `Question ${i + 1}: What is the answer?`,
+          options: ["Option 1", "Option 2", "Option 3", "Option 4"],
+          correctAnswer: "Option 1",
+        }));
+      }
+    } catch (error) {
+      console.error("Error parsing questions:", error);
+      parsedQuestions = [];
+    }
+
+    setQuestions(parsedQuestions);
+    setShowConfigModal(false);
+    setQuizStarted(true);
+    setTimer(config.timerDuration);
+    setTotalTime(config.timerType === "individual" ? config.timerDuration * config.numQuestions : config.timerDuration * 60);
+    setStartTime(new Date());
+  };
+
+  // Answer Selection Handler
   const handleAnswerSelect = (answer) => {
     setSelectedOption(answer);
+    
+    const newAnswers = [...userAnswers, answer];
+    setUserAnswers(newAnswers);
+  
     setTimeout(() => {
-      setUserAnswers([...userAnswers, answer]);
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
         if (config.timerType === "individual") {
@@ -171,11 +183,12 @@ function Quiz() {
         }
         setSelectedOption(null);
       } else {
-        finishQuiz();
+        finishQuiz(newAnswers);
       }
     }, 1500);
   };
 
+  // Timer Effects
   useEffect(() => {
     if (quizStarted && !quizFinished) {
       const interval = setInterval(() => {
@@ -194,47 +207,50 @@ function Quiz() {
       if (config.timerType === "individual" && timer === 0) {
         handleTimeUp();
       } else if (config.timerType === "collective" && totalTime === 0) {
-        finishQuiz();
+        finishQuiz(userAnswers);
       }
     }
   }, [timer, totalTime, quizStarted, quizFinished, config.timerType]);
 
+  // Time Up Handler
   const handleTimeUp = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setTimer(config.timerDuration);
     } else {
-      finishQuiz();
+      finishQuiz(userAnswers);
     }
   };
 
-  const finishQuiz = () => {
+  // Finish Quiz and Save Results
+  const finishQuiz = (answers) => {
     const endTime = new Date();
     const timeTaken = (endTime - startTime) / 1000;
     setActualTimeTaken(timeTaken);
     setQuizFinished(true);
     setQuizStarted(false);
 
-    // Get email from localStorage - ensure this matches how you store it during signup
-    const userEmail = localStorage.getItem('token'); // or localStorage.getItem('email')
+    const userEmail = localStorage.getItem('token');
 
     if (!userEmail) {
       console.error("No user email found in localStorage");
       return;
     }
 
-    // Prepare the results data
+    const finalScore = answers.filter(
+      (answer, index) => answer === questions[index]?.correctAnswer
+    ).length;
+
     const results = {
       date: new Date().toISOString(),
       topic: config.topic,
       difficulty: config.difficulty,
       timeTaken: timeTaken,
-      score: calculateScore(),
+      score: finalScore,
       totalQuestions: questions.length,
-      email: userEmail // Make sure this matches your backend schema
+      email: userEmail
     };
 
-    // Send results to backend
     axios.post('http://localhost:5175/SaveQuizResults', results)
       .then(response => {
         console.log("Results saved successfully:", response.data);
@@ -244,24 +260,34 @@ function Quiz() {
       });
   };
 
+  // Score Calculation
   const calculateScore = () => {
-    return userAnswers.filter(
+    const allAnswers = quizFinished ? userAnswers : 
+      (currentQuestionIndex === questions.length - 1 
+        ? [...userAnswers, selectedOption] 
+        : userAnswers);
+      
+    return allAnswers.filter(
       (answer, index) => answer === questions[index]?.correctAnswer
     ).length;
   };
 
+  // Time Formatting
   const formatTime = (timeInSeconds) => {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+  // Render
   return (
     <div style={styles.pageWrapper}>
+      {/* Configuration Modal */}
       {showConfigModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
             <h2 style={styles.modalTitle}>Quiz Configuration</h2>
+            {error && <p style={{color: 'red'}}>{error}</p>}
             <label style={styles.label}>
               Topic:
               <input
@@ -323,6 +349,7 @@ function Quiz() {
         </div>
       )}
 
+      {/* Quiz Questions */}
       {quizStarted && !quizFinished && (
         <div style={styles.quizFullPage}>
           <h2 style={styles.questionTitle}>Question {currentQuestionIndex + 1}</h2>
@@ -349,7 +376,7 @@ function Quiz() {
         </div>
       )}
 
-
+      {/* Quiz Results */}
       {quizFinished && (
         <div style={styles.quizFullPage}>
           <h2 style={styles.resultTitle}>Quiz Finished!</h2>
