@@ -7,7 +7,7 @@ function Quiz() {
     const savedTopic = localStorage.getItem("selectedTopic");
     if (savedTopic) {
       setConfig((prevConfig) => ({ ...prevConfig, topic: savedTopic }));
-    }
+    }handleAnswerSelect
   }, []);
 
   const [config, setConfig] = useState({

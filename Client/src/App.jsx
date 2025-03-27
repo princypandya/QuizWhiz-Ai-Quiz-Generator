@@ -8,7 +8,6 @@ import Quiz from './Components/Pages/Quiz';
 import Signup from './Components/Pages/Signup';
 import Login from './Components/Pages/Login';
 import Results from './Components/Pages/Results';
-import AIChatComponent from './Components/Pages/AIChatComponent';
 
 const App =()=>{
   const [progress, setProgress] = useState(0)
@@ -30,7 +29,6 @@ const App =()=>{
             <Route path="/Signup" element={<Signup/>} />
             <Route path="/Login" element={<Login/>} />
             <Route path="/Results" element={<Results />} />
-            <Route path="/AIChatComponent" element={<AIChatComponent />} />
             {/* <Route path="" element={<1V1 />} />
             <Route path="" element={<Custom />} /> */}
           </Routes>
