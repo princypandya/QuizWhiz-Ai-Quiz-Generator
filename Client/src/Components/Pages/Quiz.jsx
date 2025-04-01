@@ -245,6 +245,7 @@ function Quiz() {
       date: new Date().toISOString(),
       topic: config.topic,
       difficulty: config.difficulty,
+      totalTime: totalTime,
       timeTaken: timeTaken,
       score: finalScore,
       totalQuestions: questions.length,
