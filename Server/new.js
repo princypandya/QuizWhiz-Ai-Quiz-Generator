@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(cors());
 
 // Connect to MongoDB
-mongoose.connect("mongodb://localhost:27017/UserDetails")
+mongoose.connect("mongodb://127.0.0.1:27017/UserDetails")
     .then(() => {
         console.log("MongoDB connected");
     })
@@ -58,7 +58,8 @@ app.post('/SaveQuizResults', async (req, res) => {
         email // This must match your schema
       });
   
-      await newResult.save();
+      await newResult.save(); // calculates accuracy
+
       res.status(201).json({ message: 'Results saved successfully' });
     } catch (error) {
       console.error("Backend error:", error);
