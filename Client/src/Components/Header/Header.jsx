@@ -57,13 +57,13 @@ function Header() {
               >
                 <FaHome className="me-2" /> Home
               </Nav.Link>
-              <Nav.Link
+              {/* <Nav.Link
                 as={Link}
                 to="/1V1"
                 className="text-dark d-flex align-items-center mx-3 hover-effect"
               >
                 <FaUserFriends className="me-2" /> 1V1
-              </Nav.Link>
+              </Nav.Link> */}
               <Nav.Link
                 as={Link}
                 to="/Results"
@@ -71,13 +71,13 @@ function Header() {
               >
                 <FaChartLine className="me-2" /> Results
               </Nav.Link>
-              <Nav.Link
+              {/* <Nav.Link
                 as={Link}
                 to="/Custom"
                 className="text-dark d-flex align-items-center mx-3 hover-effect"
               >
                 <FaCogs className="me-2" /> Custom
-              </Nav.Link>
+              </Nav.Link> */}
               <Nav.Link
                 as={Link}
                 to="/Quiz"
