@@ -1,34 +1,64 @@
 import React, { useMemo } from 'react';
-import { Chart as ChartJS } from 'chart.js/auto';
 import { Bar } from 'react-chartjs-2';
 
 function BarChart({ results }) {
-    // Function to calculate average accuracy for each difficulty level
     const calculateAverageAccuracy = (difficulty) => {
         const filteredResults = results.filter(r => r.difficulty === difficulty);
-        const totalAccuracy = filteredResults.reduce((sum, r) => sum + r.accuracy, 0);
-        return filteredResults.length > 0 ? (totalAccuracy / filteredResults.length).toFixed(2) : 0;
+        const totalAccuracy = filteredResults.reduce((sum, r) => {
+            if (r.totalQuestions && r.score !== undefined) {
+                return sum + (r.score / r.totalQuestions);
+            }
+            return sum;
+        }, 0);
+        return filteredResults.length > 0
+            ? parseFloat(((totalAccuracy / filteredResults.length) * 100).toFixed(2))
+            : 0;
     };
 
-    // Memoize chart data for performance optimization
     const chartData = useMemo(() => ({
         labels: ['Easy', 'Medium', 'Hard'],
         datasets: [
             {
                 label: 'Average Accuracy (%)',
-                backgroundColor: ['#4CAF50', '#FFC107', '#F44336'], // Colors: Green, Yellow, Red
+                backgroundColor: ['#4CAF50', '#FFC107', '#F44336'],
                 data: [
-                    calculateAverageAccuracy('Easy'),
-                    calculateAverageAccuracy('Medium'),
-                    calculateAverageAccuracy('Hard'),
+                    calculateAverageAccuracy('easy'),
+                    calculateAverageAccuracy('medium'),
+                    calculateAverageAccuracy('hard'),
                 ],
             },
         ],
-    }), [results]); // Recalculate when `results` change
+    }), [results]);
+
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' },
+            title: {
+                display: true,
+                text: 'Average Accuracy by Difficulty',
+            },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                title: {
+                    display: true,
+                    text: 'Accuracy (%)'
+                }
+            },
+        },
+    };
+
+    if (!results || results.length === 0) {
+        return <p>No data available to display chart.</p>;
+    }
 
     return (
         <div style={{ width: '600px', height: '400px' }} className="mx-auto">
-            <Bar data={chartData} />
+            <Bar data={chartData} 
+            options={options} />
         </div>
     );
 }

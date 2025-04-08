@@ -51,12 +51,14 @@ function Results() {
 
   return (
     <div>
-      <div className="mb-6">
-        <BarChart results={results} />
-      </div>
+      <div className={`m-4 p-4 w-full max-w-screen-lg mx-auto flex justify-between`}>
+        <div className="mb-6">
+          <BarChart results={results} />
+        </div>
 
-      <div className="mb-6">
-        <PieChart data={difficultyCount} />
+        <div className="mb-6 w-72 h-72 mx-auto">
+          <PieChart data={difficultyCount} />
+        </div>
       </div>
 
       {/* List of results */}
@@ -71,7 +73,6 @@ function Results() {
             topic={result.topic}
             difficulty={result.difficulty}
             accuracy={result.accuracy}
-            completed_status={result.completed_status}
           />
         ))}
       </div>

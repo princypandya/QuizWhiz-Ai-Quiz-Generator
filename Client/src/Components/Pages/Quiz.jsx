@@ -387,6 +387,12 @@ function Quiz() {
           <p style={styles.resultText}>
             Time Taken: {formatTime(actualTimeTaken)}
           </p>
+          <p style={styles.resultText}>
+            <strong>Good Job !</strong>
+          </p>
+          <p style={styles.resultText}>
+            <strong>Keep Practicing !</strong>
+          </p>
         </div>
       )}
     </div>
@@ -412,7 +418,7 @@ const styles = {
     height: "100vh",
     width: "100vw",
     backdropFilter: "blur(6px)",
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "#eff6ff",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
