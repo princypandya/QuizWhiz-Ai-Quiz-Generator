@@ -63,7 +63,7 @@ function Quiz() {
     setError(null);
 
     try {
-      const apiKey = "AIzaSyAjGFif217NTM9i3-QFAVyl5FNdMo4Rx0k"; 
+      const apiKey = "AIzaSyDDErYKdk9hSMboF-ICX5IzEijkmz9nUyY"; 
       if (!apiKey) throw new Error("API Key is missing");
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
