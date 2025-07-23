@@ -11,10 +11,10 @@ function Quiz() {
   });
 
   const [showConfigModal, setShowConfigModal] = useState(true);
+  const [userAnswers, setUserAnswers] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [error, setError] = useState(null);
-  const [userAnswers, setUserAnswers] = useState([]);
   const [timer, setTimer] = useState(config.timerDuration);
   const [totalTime, setTotalTime] = useState(config.timerDuration * config.numQuestions);
   const [quizStarted, setQuizStarted] = useState(false);
@@ -22,6 +22,8 @@ function Quiz() {
   const [selectedOption, setSelectedOption] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [actualTimeTaken, setActualTimeTaken] = useState(0);
+  const [finalScore, setFinalScore] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   // Load saved configuration on component mount
   useEffect(() => {
@@ -39,31 +41,12 @@ function Quiz() {
     }
   }, []);
 
-  // Configuration change handlers
-  const handleTopicChange = (e) => {
-    const newTopic = e.target.value;
-    setConfig((prevConfig) => ({ ...prevConfig, topic: newTopic }));
-    localStorage.setItem("selectedTopic", newTopic);
-  };
-
-  const handleDifficultyChange = (e) => {
-    const newDifficulty = e.target.value;
-    setConfig((prevConfig) => ({ ...prevConfig, difficulty: newDifficulty }));
-    localStorage.setItem("selectedDifficulty", newDifficulty);
-  };
-
-  const handleNumQuestionsChange = (e) => {
-    const newNumQuestions = parseInt(e.target.value);
-    setConfig((prevConfig) => ({ ...prevConfig, numQuestions: newNumQuestions }));
-    localStorage.setItem("numQuestions", newNumQuestions.toString());
-  };
-
   // AI Question Generation
   const handleCompletion = async () => {
     setError(null);
 
     try {
-      const apiKey = "AIzaSyDDErYKdk9hSMboF-ICX5IzEijkmz9nUyY"; 
+      const apiKey = "AIzaSyDDErYKdk9hSMboF-ICX5IzEijkmz9nUyY";
       if (!apiKey) throw new Error("API Key is missing");
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
@@ -78,7 +61,7 @@ function Quiz() {
             {
               parts: [
                 {
-                  text: `Generate ${config.numQuestions} multiple-choice questions (MCQs) with difficulty level "${config.difficulty}" on the topic "${config.topic}". Return JSON only in the format:
+                  text: `Generate ${config.numQuestions} new multiple-choice questions (MCQs) with difficulty level "${config.difficulty}" on the topic "${config.topic}". Return JSON only in the format:
                   [
                     {
                       "id": 1,
@@ -137,7 +120,7 @@ function Quiz() {
     try {
       // First try to get AI-generated questions
       const aiQuestions = await handleCompletion();
-      
+
       if (aiQuestions && aiQuestions.length > 0) {
         parsedQuestions = aiQuestions;
         console.log("Generated from AI");
@@ -171,10 +154,20 @@ function Quiz() {
   // Answer Selection Handler
   const handleAnswerSelect = (answer) => {
     setSelectedOption(answer);
-    
-    const newAnswers = [...userAnswers, answer];
-    setUserAnswers(newAnswers);
-  
+
+    const currentQuestion = questions[currentQuestionIndex];
+    const answerDetails = {
+      questionText: currentQuestion.text,
+      options: currentQuestion.options,
+      correctAnswer: currentQuestion.correctAnswer,
+      userAnswer: answer,
+      isCorrect: answer === currentQuestion.correctAnswer
+    }
+
+    const updatedAnswers = [...userAnswers, answerDetails];
+    setUserAnswers(updatedAnswers);
+
+
     setTimeout(() => {
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -183,7 +176,7 @@ function Quiz() {
         }
         setSelectedOption(null);
       } else {
-        finishQuiz(newAnswers);
+        finishQuiz(updatedAnswers);
       }
     }, 1500);
   };
@@ -207,7 +200,18 @@ function Quiz() {
       if (config.timerType === "individual" && timer === 0) {
         handleTimeUp();
       } else if (config.timerType === "collective" && totalTime === 0) {
-        finishQuiz(userAnswers);
+        const currentQuestion = questions[currentQuestionIndex];
+        const skippedAnswer = {
+          questionText: currentQuestion.text,
+          options: currentQuestion.options,
+          correctAnswer: currentQuestion.correctAnswer,
+          userAnswer: null,
+          isCorrect: false,
+        };
+
+        const updatedAnswers = [...userAnswers, skippedAnswer];
+        setUserAnswers(updatedAnswers);
+        finishQuiz(updatedAnswers);
       }
     }
   }, [timer, totalTime, quizStarted, quizFinished, config.timerType]);
@@ -218,7 +222,18 @@ function Quiz() {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setTimer(config.timerDuration);
     } else {
-      finishQuiz(userAnswers);
+      const currentQuestion = questions[currentQuestionIndex];
+      const skippedAnswer = {
+        questionText: currentQuestion.text,
+        options: currentQuestion.options,
+        correctAnswer: currentQuestion.correctAnswer,
+        userAnswer: null,
+        isCorrect: false,
+      };
+
+      const updatedAnswers = [...userAnswers, skippedAnswer];
+      setUserAnswers(updatedAnswers);
+      finishQuiz(updatedAnswers);
     }
   };
 
@@ -237,9 +252,8 @@ function Quiz() {
       return;
     }
 
-    const finalScore = answers.filter(
-      (answer, index) => answer === questions[index]?.correctAnswer
-    ).length;
+    const score = answers.filter((answer) => answer.isCorrect).length;
+    setFinalScore(score);
 
     const results = {
       date: new Date().toISOString(),
@@ -247,9 +261,10 @@ function Quiz() {
       difficulty: config.difficulty,
       totalTime: totalTime,
       timeTaken: timeTaken,
-      score: finalScore,
+      score: score,
       totalQuestions: questions.length,
-      email: userEmail
+      email: userEmail,
+      quiz: answers
     };
 
     axios.post('http://localhost:5175/SaveQuizResults', results)
@@ -259,18 +274,6 @@ function Quiz() {
       .catch(error => {
         console.error("Error saving results:", error.response?.data || error.message);
       });
-  };
-
-  // Score Calculation
-  const calculateScore = () => {
-    const allAnswers = quizFinished ? userAnswers : 
-      (currentQuestionIndex === questions.length - 1 
-        ? [...userAnswers, selectedOption] 
-        : userAnswers);
-      
-    return allAnswers.filter(
-      (answer, index) => answer === questions[index]?.correctAnswer
-    ).length;
   };
 
   // Time Formatting
@@ -288,7 +291,7 @@ function Quiz() {
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
             <h2 style={styles.modalTitle}>Quiz Configuration</h2>
-            {error && <p style={{color: 'red'}}>{error}</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
             <label style={styles.label}>
               Topic:
               <input
@@ -302,7 +305,7 @@ function Quiz() {
               Difficulty:
               <select
                 value={config.difficulty}
-                onChange={handleDifficultyChange}
+                onChange={(e) => setConfig({ ...config, difficulty: e.target.value })}
                 style={styles.input}
               >
                 <option value="easy">Easy</option>
@@ -316,7 +319,7 @@ function Quiz() {
               <input
                 type="number"
                 value={config.numQuestions}
-                onChange={handleNumQuestionsChange}
+                onChange={(e) => setConfig({ ...config, numQuestions: e.target.value })}
                 style={styles.input}
               />
             </label>
@@ -377,24 +380,86 @@ function Quiz() {
         </div>
       )}
 
-      {/* Quiz Results */}
       {quizFinished && (
-        <div style={styles.quizFullPage}>
-          <h2 style={styles.resultTitle}>Quiz Finished!</h2>
-          <p style={styles.resultText}>
-            Your Score: {calculateScore()} / {questions.length}
-          </p>
-          <p style={styles.resultText}>
-            Time Taken: {formatTime(actualTimeTaken)}
-          </p>
-          <p style={styles.resultText}>
-            <strong>Good Job !</strong>
-          </p>
-          <p style={styles.resultText}>
-            <strong>Keep Practicing !</strong>
-          </p>
+        <div
+          style={{
+            ...styles.quizFullPage,
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row',
+            gap: '40px',
+            marginTop: '40px',
+            padding: '20px',
+          }}
+        >
+          {/* Circular Score Indicator */}
+          <svg
+            height="120"
+            width="120"
+            style={{
+              flexShrink: 0,
+              maxWidth: '100%',
+            }}
+          >
+            <circle
+              stroke={
+                finalScore / questions.length < 0.3
+                  ? '#ef4444'
+                  : finalScore / questions.length <= 0.6
+                    ? '#facc15'
+                    : '#22c55e'
+              }
+              fill="transparent"
+              strokeWidth="15"
+              r="50"
+              cx="60"
+              cy="60"
+            />
+            <text
+              x="50%"
+              y="50%"
+              textAnchor="middle"
+              dy=".3em"
+              fontSize="16"
+              fill="#111827"
+              fontWeight="bold"
+            >
+              {finalScore} / {questions.length}
+            </text>
+          </svg>
+
+          {/* Message Box */}
+          <div
+            style={{
+              maxWidth: '300px',
+              width: '100%',
+              textAlign: 'center',
+            }}
+          >
+            <h2 style={{ ...styles.resultTitle, fontSize: '1.5rem', marginBottom: '1rem' }}>
+              Quiz Finished!
+            </h2>
+            <p
+              style={{
+                fontSize: '1rem',
+                color: '#1f3b6cff',
+                lineHeight: '1.5',
+              }}
+            >
+              {(finalScore / questions.length < 0.3) &&
+                'You need improvement. Keep practicing!'}
+              {(finalScore / questions.length >= 0.3 &&
+                finalScore / questions.length < 0.6) &&
+                "Good job! You're getting there."}
+              {(finalScore / questions.length >= 0.6) &&
+                'Excellent! You did really well!'}
+            </p>
+          </div>
         </div>
       )}
+
     </div>
   );
 }

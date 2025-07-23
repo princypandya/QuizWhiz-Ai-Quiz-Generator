@@ -11,6 +11,13 @@ const resultsSchema = new mongoose.Schema({
   totalQuestions: { type: Number, required: true },
   email: { type: String, required: true },
   accuracy: { type: Number, default: 0 }, // in percentage
+  quiz: [{
+    questionText: { type: String, required: true },
+    options: { type: [String], required: true },
+    correctAnswer: { type: String, required: true },
+    userAnswer: { type: String, default: null },
+    isCorrect: { type: Boolean, default: false }
+  }]
 }, { timestamps: true });
 
 resultsSchema.pre('save', function (next) {

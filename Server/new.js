@@ -41,7 +41,17 @@ app.post('/Login', async (req, res) => {
 // In your backend route (e.g., routes/results.js)
 app.post('/SaveQuizResults', async (req, res) => {
   try {
-    const { date, topic, difficulty, totalTime, timeTaken, score, totalQuestions, email } = req.body;
+    const {
+      date,
+      topic,
+      difficulty,
+      totalTime,
+      timeTaken,
+      score,
+      totalQuestions,
+      email,
+      quiz
+    } = req.body;
 
     // Add validation
     if (!email) {
@@ -56,7 +66,8 @@ app.post('/SaveQuizResults', async (req, res) => {
       totalTime,
       score,
       totalQuestions,
-      email // This must match your schema
+      email,
+      quiz // This must match your schema
     });
 
     await newResult.save(); // calculates accuracy
