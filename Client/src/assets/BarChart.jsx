@@ -20,7 +20,7 @@ function BarChart({ results }) {
         datasets: [
             {
                 label: 'Average Accuracy (%)',
-                backgroundColor: ['#4CAF50', '#FFC107', '#F44336'],
+                backgroundColor: ['#66E890', '#FFC107', '#F87171'],
                 data: [
                     calculateAverageAccuracy('easy'),
                     calculateAverageAccuracy('medium'),

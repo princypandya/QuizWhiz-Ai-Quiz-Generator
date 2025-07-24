@@ -10,8 +10,8 @@ function PieChart({ data }) {
             {
                 label: 'Difficulty Distribution',
                 data: [data.easy, data.medium, data.hard], // Aggregate difficulty counts
-                backgroundColor: ['#4CAF50', '#FFC107', '#F44336'], // Colors for each slice
-                hoverOffset: 4, // Offset when hovering
+                backgroundColor: ['#22C55E', '#FFC107', '#F87171'], // Colors for each slice
+                hoverOffset: 16, // Offset when hovering
             },
         ],
     }), [data]); // Re-calculate only if `data` changes
