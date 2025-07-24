@@ -73,6 +73,7 @@ function Results() {
             topic={result.topic}
             difficulty={result.difficulty}
             accuracy={result.accuracy}
+            quiz={result.quiz}
           />
         ))}
       </div>
