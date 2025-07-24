@@ -51,13 +51,13 @@ function Results() {
 
   return (
     <div>
-      <div className={`m-4 p-4 w-full max-w-screen-lg mx-auto flex justify-between`}>
-        <div className="mb-6">
-          <BarChart results={results} />
+      <div className="flex flex-wrap justify-between m-10 ml-20 mr-20">
+        <div className="flex flex-col">
+            <BarChart results={results} />
         </div>
 
-        <div className="mb-6 w-72 h-72 mx-auto">
-          <PieChart data={difficultyCount} />
+        <div className="flex flex-col">
+            <PieChart data={difficultyCount} />
         </div>
       </div>
 

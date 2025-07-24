@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
 
 function ResultBox(props) {
+
+  const [showMore, setShowMore] = useState(false); // toggle state
+
   const borderColor =
     props.accuracy >= 80
       ? 'border-green-500'
@@ -10,10 +15,10 @@ function ResultBox(props) {
 
   return (
     <div>
-      <div className={`border-2 ${borderColor} rounded-xl m-4 p-4 shadow-md w-full max-w-screen-lg mx-auto`}>
+      <div className={`border-2 ${borderColor} rounded-xl m-5 p-4 shadow-md`}>
 
         {/* Top Row: Quiz Details */}
-        <div className="flex flex-wrap justify-between gap-4 ml-10 mb-10">
+        <div className="flex flex-wrap justify-between gap-4">
           <div className="flex flex-col min-w-[150px] flex-1 sm:max-w-[200px]">
             <span className="text-sm text-gray-500">Date</span>
             <span className="font-semibold break-words">{props.date}</span>
@@ -42,8 +47,29 @@ function ResultBox(props) {
           </div>
         </div>
 
-        {/* Bottom Row: Questions */}
-        <div className="w-full mt-6">
+        {/* Button placed inside, aligned right */}
+        <div className="w-full flex justify-end mt-4">
+          <button
+            className="bg-blue-400 text-white text-sm px-2 py-1 rounded hover:bg-blue-600 transition"
+            onClick={() => setShowMore(!showMore)}
+          >
+            {showMore ? 'Show Less' : 'Show More'}
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom Row: Questions */}
+      {/* AnimatePresence wrapper */}
+      <AnimatePresence initial={false}>
+      {showMore && (
+        <motion.div
+          key="dropdown"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 1, ease: 'easeInOut' }}
+          className="overflow-hidden w-full mt-6 m-5 p-4"
+        >
           <div className="text-xl mb-2 font-semibold text-blue-500">Questions</div>
           <div className="text-sm space-y-4 m-2">
             {props.quiz && props.quiz.length > 0 ? (
@@ -87,8 +113,8 @@ function ResultBox(props) {
               <div className="text-gray-400">No questions available</div>
             )}
           </div>
-        </div>
-      </div>
+        </motion.div>)}
+        </AnimatePresence>
     </div>
   );
 }
