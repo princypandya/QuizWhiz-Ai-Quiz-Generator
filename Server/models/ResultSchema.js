@@ -14,6 +14,7 @@ const resultsSchema = new mongoose.Schema({
   quiz: [{
     questionText: { type: String, required: true },
     options: { type: [String], required: true },
+    note: {type: [String], default: ''},
     correctAnswer: { type: String, required: true },
     userAnswer: { type: String, default: null },
     isCorrect: { type: Boolean, default: false }
