@@ -51,7 +51,7 @@ function ResultBox(props) {
         {/* Button placed inside, aligned right */}
         <div className="w-full flex justify-end mt-4">
           <button
-            className="bg-blue-400 text-white text-sm px-2 py-1 rounded hover:bg-blue-600 transition"
+            className="bg-purple-400 text-white text-sm px-2 py-1 rounded hover:bg-purple-600 transition"
             onClick={() => setShowMore(!showMore)}
           >
             {showMore ? 'Show Less' : 'Show More'}
@@ -70,95 +70,103 @@ function ResultBox(props) {
             transition={{ duration: 1, ease: 'easeInOut' }}
             className="overflow-hidden mt-6 m-5 p-4"
           >
-            <div className="text-[25px] mb-5 font-semibold text-blue-500">Questions</div>
-            <div className="text-sm space-y-4">
+            <div className="text-[25px] mb-5 font-semibold text-purple-600">Questions</div>
+
+            <div className="text-sm space-y-6">
               {props.quiz && props.quiz.length > 0 ? (
                 props.quiz.map((q, idx) => (
-                  <div key={idx} className="mr-6 ml-6">
-                    <div className="text-[16px] font-medium mb-6">
-                      Q{idx + 1}: {q.questionText}
+                  <div
+                    key={idx}
+                    className="bg-gradient-to-br from-white to-purple-50 p-4   sm:p-6 md:p-7 rounded-2xl shadow-md border border-purple-100 mx-4 sm:mx-6 transition-all duration-300"
+                  >
+                    {/* Question Text */}
+                    <div className="text-[16px] sm:text-[17px] md:text-lg font-semibold mb-4 text-gray-900 leading-snug">
+                      <span className="text-purple-600">Q{idx + 1}:</span> {q.questionText}
                     </div>
-                    <div className="ml-4">
+
+                    {/* Options */}
+                    <div className="ml-2 space-y-2">
                       {Array.isArray(q.options) ? (
-                        <div className="gap-2 mb-6">
-                          {q.options.map((opt, i) => {
-                            let optionStyle = 'bg-gray-50 border-gray-400 text-gray-700 mb-2';
+                        q.options.map((opt, i) => {
+                          let optionStyle =
+                            'bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100';
 
-                            if (opt === q.correctAnswer && opt === q.userAnswer) {
-                              optionStyle = 'bg-green-100 text-green-600 font-semibold mb-2';
-                            } else if (opt === q.correctAnswer) {
-                              optionStyle = 'bg-green-50 text-green-600 font-medium mb-2';
-                            } else if (opt === q.userAnswer) {
-                              optionStyle = 'bg-red-50 text-red-600 font-medium mb-2';
-                            }
+                          if (opt === q.correctAnswer && opt === q.userAnswer) {
+                            optionStyle =
+                              'bg-emerald-100 text-emerald-800 font-semibold border border-emerald-400';
+                          } else if (opt === q.correctAnswer) {
+                            optionStyle =
+                              'bg-teal-50 text-teal-700 border border-teal-300';
+                          } else if (opt === q.userAnswer) {
+                            optionStyle =
+                              'bg-rose-50 text-rose-600 border border-rose-300';
+                          }
 
-                            return (
-                              <div
-                                key={i}
-                                className={`rounded-lg p-3 shadow-sm transition-all duration-300 ${optionStyle}`}
-                              >
-                                {opt}
-                              </div>
-                            );
-                          })}
-
-                          {/* Note Section */}
-                          <div className="w-full mt-4">
-                            {editingNotes[idx] ? (
-                              <>
-                                <textarea
-                                  className="w-full mr-4 p-2 border border-blue-300 rounded text-sm"
-                                  rows={3}
-                                  value={noteInputs[idx] || ''}
-                                  onChange={(e) =>
-                                    setNoteInputs((prev) => ({
-                                      ...prev,
-                                      [idx]: e.target.value,
-                                    }))
-                                  }
-                                  placeholder="Write your note here..."
-                                />
-                                <div className="flex justify-end mt-2">
-                                  <button
-                                    className="bg-green-500 text-white text-sm px-3 py-1 rounded hover:bg-green-600 transition"
-                                    onClick={() => {
-                                      // Save note locally (or send to backend here)
-                                      props.quiz[idx].note = noteInputs[idx];
-                                      setEditingNotes((prev) => ({ ...prev, [idx]: false }));
-                                    }}
-                                  >
-                                    Done
-                                  </button>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                {String(q.note || '').trim() && (
-                                  <div className="bg-blue-50 border border-blue-400 rounded p-3 text-sm text-blue-700 shadow-sm">
-                                    {q.note}
-                                  </div>
-                                )}
-                                <div className="flex justify-end mt-2">
-                                  <button
-                                    className="bg-blue-400 text-white text-sm px-3 py-1 rounded hover:bg-blue-600 transition"
-                                    onClick={() => {
-                                      setNoteInputs((prev) => ({
-                                        ...prev,
-                                        [idx]: q.note || '',
-                                      }));
-                                      setEditingNotes((prev) => ({ ...prev, [idx]: true }));
-                                    }}
-                                  >
-                                    {String(q.note || '').trim() ? 'Change Note' : 'Add Note'}
-                                  </button>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </div>
+                          return (
+                            <div
+                              key={i}
+                              className={`rounded-xl p-3 shadow-sm transition-all duration-300 text-sm sm:text-base ${optionStyle}`}
+                            >
+                              {opt}
+                            </div>
+                          );
+                        })
                       ) : (
                         <div>{q.options}</div>
                       )}
+
+                      {/* Note Section */}
+                      <div className="w-full mt-3">
+                        {editingNotes[idx] ? (
+                          <>
+                            <textarea
+                              className="w-full p-3 border border-yellow-300 rounded-xl text-sm bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+                              rows={3}
+                              value={noteInputs[idx] || ''}
+                              onChange={(e) =>
+                                setNoteInputs((prev) => ({
+                                  ...prev,
+                                  [idx]: e.target.value,
+                                }))
+                              }
+                              placeholder="Write your note here..."
+                            />
+                            <div className="flex justify-end mt-2">
+                              <button
+                                className="bg-emerald-500 text-white text-sm px-4 py-1.5 rounded-lg hover:bg-emerald-600 transition"
+                                onClick={() => {
+                                  props.quiz[idx].note = noteInputs[idx];
+                                  setEditingNotes((prev) => ({ ...prev, [idx]: false }));
+                                }}
+                              >
+                                Done
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {String(q.note || '').trim() && (
+                              <div className="bg-yellow-100 border border-yellow-300 rounded-xl p-3 text-sm text-yellow-800 shadow-sm whitespace-pre-wrap">
+                                {q.note}
+                              </div>
+                            )}
+                            <div className="flex justify-end mt-2">
+                              <button
+                                className="bg-purple-500 text-white text-sm px-4 py-1.5 rounded-lg hover:bg-purple-600 transition"
+                                onClick={() => {
+                                  setNoteInputs((prev) => ({
+                                    ...prev,
+                                    [idx]: q.note || '',
+                                  }));
+                                  setEditingNotes((prev) => ({ ...prev, [idx]: true }));
+                                }}
+                              >
+                                {String(q.note || '').trim() ? 'Change Note' : 'Add Note'}
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))
@@ -166,6 +174,7 @@ function ResultBox(props) {
                 <div className="text-gray-400">No questions available</div>
               )}
             </div>
+
           </motion.div>
         )}
       </AnimatePresence>
