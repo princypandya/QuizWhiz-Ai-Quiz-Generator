@@ -133,7 +133,7 @@ function ResultBox(props) {
                               </>
                             ) : (
                               <>
-                                {q.note && q.note !== '' && (
+                                {String(q.note || '').trim() && (
                                   <div className="bg-blue-50 border border-blue-400 rounded p-3 text-sm text-blue-700 shadow-sm">
                                     {q.note}
                                   </div>
@@ -149,7 +149,7 @@ function ResultBox(props) {
                                       setEditingNotes((prev) => ({ ...prev, [idx]: true }));
                                     }}
                                   >
-                                    {q.note && q.note !== '' ? 'Change Note' : 'Add Note'}
+                                    {String(q.note || '').trim() ? 'Change Note' : 'Add Note'}
                                   </button>
                                 </div>
                               </>
