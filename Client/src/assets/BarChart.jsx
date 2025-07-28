@@ -49,6 +49,15 @@ function BarChart({ results }) {
                 }
             },
         },
+        elements: {
+            bar: {
+                hoverBackgroundColor: (ctx) => {
+                    const index = ctx.dataIndex;
+                    const baseColors = ['#66E890', '#FFC107', '#F87171'];
+                    return baseColors[index] + 'CC'; // Slightly more opaque on hover
+                },
+            },
+        },
     };
 
     if (!results || results.length === 0) {

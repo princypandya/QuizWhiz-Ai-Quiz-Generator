@@ -10,15 +10,29 @@ function PieChart({ data }) {
             {
                 label: 'Difficulty Distribution',
                 data: [data.easy, data.medium, data.hard], // Aggregate difficulty counts
-                backgroundColor: ['#22C55E', '#FFC107', '#F87171'], // Colors for each slice
+                backgroundColor: ['#66E890', '#FFC107', '#F87171'], // Colors for each slice
+                hoverBackgroundColor: ['#66E890CC', '#FFC107CC', '#F87171CC'], // Colors for each slice
                 hoverOffset: 16, // Offset when hovering
             },
         ],
     }), [data]); // Re-calculate only if `data` changes
 
+    const options = {
+        elements: {
+            doughnut: {
+                hoverBackgroundColor: (ctx) => {
+                    const index = ctx.dataIndex;
+                    const baseColors = ['#66E890', '#FFC107', '#F87171'];
+                    return baseColors[index] + 'CC'; // Slightly more opaque on hover
+                },
+            },
+        },
+    }
+
     return (
         <div style={{ width: '400px', height: '400px' }} className="mx-auto">
-            <Doughnut data={chartData} />
+            <Doughnut data={chartData}
+                options={options} />
         </div>
     );
 }
