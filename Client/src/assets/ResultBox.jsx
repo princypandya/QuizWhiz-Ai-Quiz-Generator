@@ -166,12 +166,23 @@ function ResultBox(props) {
                             <div className="flex justify-end mt-2">
                               <button
                                 className="bg-purple-500 text-white text-sm px-4 py-1.5 rounded-lg hover:bg-purple-600 transition"
-                                onClick={() => {
+                                onClick={ async () => {
                                   setNoteInputs((prev) => ({
                                     ...prev,
                                     [idx]: q.note || '',
                                   }));
                                   setEditingNotes((prev) => ({ ...prev, [idx]: true }));
+
+                                  try {
+                                    await axios.post('http://localhost:5175/api/saveNote', {
+                                      email: props.email,
+                                      questionText: q.questionText,
+                                      note: noteInputs[idx],
+                                    });
+                                  } catch (error) {
+                                    console.error('Error saving note:', error);
+                                    console.log("📧 Email being sent:", props.email);
+                                  }
                                 }}
                               >
                                 {String(q.note || '').trim() ? 'Change Note' : 'Add Note'}
