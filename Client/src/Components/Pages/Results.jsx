@@ -74,6 +74,7 @@ function Results() {
             difficulty={result.difficulty}
             accuracy={result.accuracy}
             quiz={result.quiz}
+            email={result.email}
           />
         ))}
       </div>

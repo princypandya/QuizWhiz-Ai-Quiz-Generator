@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 
 function ResultBox(props) {
   const [showMore, setShowMore] = useState(false);
@@ -134,10 +135,22 @@ function ResultBox(props) {
                             <div className="flex justify-end mt-2">
                               <button
                                 className="bg-emerald-500 text-white text-sm px-4 py-1.5 rounded-lg hover:bg-emerald-600 transition"
-                                onClick={() => {
+                                onClick={async () => {
                                   props.quiz[idx].note = noteInputs[idx];
                                   setEditingNotes((prev) => ({ ...prev, [idx]: false }));
+
+                                  try {
+                                    await axios.post('http://localhost:5175/api/saveNote', {
+                                      email: props.email,
+                                      questionText: q.questionText,
+                                      note: noteInputs[idx],
+                                    });
+                                  } catch (error) {
+                                    console.error('Error saving note:', error);
+                                    console.log("📧 Email being sent:", props.email);
+                                  }
                                 }}
+
                               >
                                 Done
                               </button>

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const SignUpModel = require('./models/SignUpSchema');
 const Results = require('./models/ResultSchema');
+const ResultSchema = require('./models/ResultSchema');
 
 const app = express();
 app.use(express.json());
@@ -93,6 +94,47 @@ app.get('/GetUserResults/:email', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+app.post('/api/saveNote', async (req, res) => {
+  const { email, questionText, note } = req.body;
+
+  console.log('🔍 Incoming data:', { email, questionText, note });
+
+  if (!email || !questionText || !note) {
+    console.log('❌ Missing data');
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const result = await Results.findOne({ email });
+
+    if (!result) {
+      console.log('❌ No result found for email:', email);
+      return res.status(404).json({ error: 'Result not found for this email' });
+    }
+
+    const question = result.quiz.find(q => q.questionText === questionText);
+
+    if (!question) {
+      console.log('❌ Question not found in quiz array');
+      return res.status(404).json({ error: 'Question not found' });
+    }
+
+    if (!question.note.includes(note)) {
+      question.note.push(note);
+    }
+
+    await result.save();
+    console.log('✅ Note saved successfully');
+    res.status(200).json({ message: 'Note saved successfully' });
+
+  } catch (err) {
+    console.error('❌ Server error:', err); // <== this will print the real reason
+    res.status(500).json({ error: 'Internal server error', details: err.message });
+  }
+});
+
+
 
 // Fetch all users for email verification
 app.get('/getUsers', async (req, res) => {
