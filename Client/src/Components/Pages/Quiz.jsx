@@ -474,7 +474,7 @@ function Quiz() {
                   transition={{ duration: 0.8, ease: 'easeInOut' }}
                   className="overflow-hidden"
                 >
-                  <div className="text-[22px] mb-5 font-semibold text-blue-500">Your Performance</div>
+                  <div className="text-[22px] mb-5 font-semibold text-blue-500">Quiz Overview</div>
                   <div className="space-y-6">
                     {userAnswers.map((q, idx) => (
                       <div
@@ -515,7 +515,7 @@ function Quiz() {
                         </div>
 
                         {/* Note Section */}
-                        <div className="mt-6">
+                        {/* <div className="mt-6">
                           {editingNotes[idx] ? (
                             <>
                               <textarea
@@ -559,7 +559,7 @@ function Quiz() {
                               </div>
                             </>
                           )}
-                        </div>
+                        </div> */}
                       </div>
                     ))}
 
