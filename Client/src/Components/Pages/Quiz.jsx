@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 function Quiz() {
+  const { getUserEmail } = useAuth();
+  
   const [config, setConfig] = useState({
     topic: "",
     difficulty: "easy",
@@ -250,10 +253,10 @@ function Quiz() {
     setQuizFinished(true);
     setQuizStarted(false);
 
-    const userEmail = localStorage.getItem('token');
+    const userEmail = getUserEmail();
 
     if (!userEmail) {
-      console.error("No user email found in localStorage");
+      console.error("No user email found");
       return;
     }
 

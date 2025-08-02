@@ -1,6 +1,8 @@
 import {React,useState,useEffect} from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Header from './Components/Header/Header';
 import Footer from './Components/Footer/Footer';
 import Home from './Components/Pages/Home';
@@ -14,30 +16,36 @@ const App =()=>{
   const Layout=()=>{
     const location=useLocation();
   }
-  useEffect(() => {
-    localStorage.clear();
-    console.log("Local storage cleared on initial render");
-  }, []);
-    return (
+  
+  return (
+    <AuthProvider>
       <Router>
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header />
-        <div style={{ flex: 1 }}>
-          <Routes>
-            <Route path="" element={<Home />} />
-            <Route path="/Quiz" element={<Quiz/>} />
-            <Route path="/Signup" element={<Signup/>} />
-            <Route path="/Login" element={<Login/>} />
-            <Route path="/Results" element={<Results />} />
-            {/* <Route path="" element={<1V1 />} />
-            <Route path="" element={<Custom />} /> */}
-          </Routes>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <Header />
+          <div style={{ flex: 1 }}>
+            <Routes>
+              <Route path="" element={<Home />} />
+              <Route path="/Quiz" element={
+                <ProtectedRoute>
+                  <Quiz/>
+                </ProtectedRoute>
+              } />
+              <Route path="/Signup" element={<Signup/>} />
+              <Route path="/Login" element={<Login/>} />
+              <Route path="/Results" element={
+                <ProtectedRoute>
+                  <Results />
+                </ProtectedRoute>
+              } />
+              {/* <Route path="" element={<1V1 />} />
+              <Route path="" element={<Custom />} /> */}
+            </Routes>
+          </div>
+          {location.pathname!=='/Signup' && location.pathname!=='/Login' && <Footer />}
         </div>
-        {location.pathname!=='/Signup' && location.pathname!=='/Login' && <Footer />}
-      </div>
-    </Router>
-    );
+      </Router>
+    </AuthProvider>
+  );
 }
-
 
 export default App

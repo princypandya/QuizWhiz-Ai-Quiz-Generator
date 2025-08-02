@@ -1,26 +1,35 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const navigate = useNavigate();
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        axios.post('http://localhost:5175/Login', { email, password })
-            .then(result => {
+        setError('');
+        setLoading(true);
+
+        try {
+            const result = await login(email, password);
+            
+            if (result.success) {
                 console.log("Login successful:", result.data);
-                localStorage.setItem('token', email);
-                console.log("Token stored in local storage: "+localStorage.getItem('token'));
-                navigate('/');  
-            })
-            .catch(err => {
-                console.log("Login error:", err);
-                setError("Invalid email or password");
-            });
+                navigate('/');
+            } else {
+                setError(result.error || 'Login failed');
+            }
+        } catch (err) {
+            console.log("Login error:", err);
+            setError("An unexpected error occurred");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -42,6 +51,7 @@ function Login() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
+                                disabled={loading}
                             />
                         </div>
 
@@ -55,10 +65,17 @@ function Login() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
+                                disabled={loading}
                             />
                         </div>
 
-                        <button type="submit" className="btn btn-primary w-100">Log In</button>
+                        <button 
+                            type="submit" 
+                            className="btn btn-primary w-100"
+                            disabled={loading}
+                        >
+                            {loading ? 'Logging in...' : 'Log In'}
+                        </button>
 
                         {error && <div className="mt-3 alert alert-danger">{error}</div>}
                     </form>
