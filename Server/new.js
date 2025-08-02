@@ -100,7 +100,7 @@ app.post('/api/saveNote', async (req, res) => {
 
   console.log('🔍 Incoming data:', { email, questionText, note });
 
-  if (!email || !questionText || !note) {
+  if (!email || !questionText) {
     console.log('❌ Missing data');
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -120,16 +120,15 @@ app.post('/api/saveNote', async (req, res) => {
       return res.status(404).json({ error: 'Question not found' });
     }
 
-    if (!question.note.includes(note)) {
-      question.note.push(note);
-    }
+    // ✅ Always overwrite note, even if it's empty
+    question.note = note;
 
     await result.save();
     console.log('✅ Note saved successfully');
     res.status(200).json({ message: 'Note saved successfully' });
 
   } catch (err) {
-    console.error('❌ Server error:', err); // <== this will print the real reason
+    console.error('❌ Server error:', err);
     res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 });
