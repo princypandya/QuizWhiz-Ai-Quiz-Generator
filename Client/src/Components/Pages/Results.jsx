@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ResultBox from '../../assets/ResultBox';
 import BarChart from '../../assets/BarChart';
 import PieChart from '../../assets/PieChart';
+import TimeSeriesChart from '../../assets/TimeSeriesChart';
 import { useNavigate } from 'react-router-dom';
 
 function Results() {
@@ -51,13 +52,22 @@ function Results() {
 
   return (
     <div>
-      <div className="flex flex-wrap justify-between m-10 ml-20 mr-20">
-        <div className="flex flex-col">
-            <BarChart results={results} />
+      {/* Charts Section */}
+      <div className="flex flex-wrap justify-center gap-8 m-10">
+        {/* Time Series Chart - Full Width */}
+        <div className="w-full max-w-6xl">
+          <TimeSeriesChart results={results} />
         </div>
+        
+        {/* Bar Chart and Pie Chart - Side by Side */}
+        <div className="flex flex-wrap justify-center gap-8 w-full max-w-6xl">
+          <div className="flex flex-col">
+            <BarChart results={results} />
+          </div>
 
-        <div className="flex flex-col">
+          <div className="flex flex-col">
             <PieChart data={difficultyCount} />
+          </div>
         </div>
       </div>
 
